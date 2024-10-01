@@ -1,0 +1,21 @@
+workflow:
+  auto_cancel:
+    on_new_commit: conservative
+    on_job_failure: all
+
+default:
+  tags:
+    - docker-52-1-21
+    - rust
+
+build:
+  script:
+    - npm install
+    - npm run build
+
+publish-package:
+  stage: deploy
+  script:
+    - npm install
+    - npm version 0.2.0-$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID
+    - npm publish
