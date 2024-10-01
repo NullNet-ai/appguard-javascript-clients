@@ -21,5 +21,5 @@ publish-package:
   stage: deploy
   script:
     - npm install
-    - npm version 0.2.0-$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID
+    - npm version 0.2.0-$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID --no-git-tag-version
     - npm publish
