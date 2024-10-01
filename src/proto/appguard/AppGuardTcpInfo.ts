@@ -1,4 +1,4 @@
-// Original file: proto/appguard.proto
+// Original file: appguard-protobuf/appguard.proto
 
 import type { AppGuardTcpConnection as _appguard_AppGuardTcpConnection, AppGuardTcpConnection__Output as _appguard_AppGuardTcpConnection__Output } from '../appguard/AppGuardTcpConnection';
 import type { AppGuardIpInfo as _appguard_AppGuardIpInfo, AppGuardIpInfo__Output as _appguard_AppGuardIpInfo__Output } from '../appguard/AppGuardIpInfo';

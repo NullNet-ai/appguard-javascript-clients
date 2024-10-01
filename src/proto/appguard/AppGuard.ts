@@ -1,4 +1,4 @@
-// Original file: proto/appguard.proto
+// Original file: appguard-protobuf/appguard.proto
 
 import type * as grpc from '@grpc/grpc-js'
 import type { MethodDefinition } from '@grpc/proto-loader'

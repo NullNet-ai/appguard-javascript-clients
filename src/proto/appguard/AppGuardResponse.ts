@@ -1,4 +1,4 @@
-// Original file: proto/appguard.proto
+// Original file: appguard-protobuf/appguard.proto
 
 import type { FirewallPolicy as _appguard_FirewallPolicy } from '../appguard/FirewallPolicy';
 

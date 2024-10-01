@@ -1,4 +1,4 @@
-// Original file: proto/appguard.proto
+// Original file: appguard-protobuf/appguard.proto
 
 import type { AppGuardGenericVal as _appguard_AppGuardGenericVal, AppGuardGenericVal__Output as _appguard_AppGuardGenericVal__Output } from '../appguard/AppGuardGenericVal';
 import type { AppGuardTcpInfo as _appguard_AppGuardTcpInfo, AppGuardTcpInfo__Output as _appguard_AppGuardTcpInfo__Output } from '../appguard/AppGuardTcpInfo';

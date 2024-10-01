@@ -1,4 +1,4 @@
-// Original file: proto/appguard.proto
+// Original file: appguard-protobuf/appguard.proto
 
 
 export interface AppGuardIpInfo {

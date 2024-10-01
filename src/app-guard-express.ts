@@ -9,7 +9,7 @@ import { AppGuardTcpConnection } from './proto/appguard/AppGuardTcpConnection'
 import { AppGuardHttpResponse } from './proto/appguard/AppGuardHttpResponse'
 import {AppGuardTcpResponse__Output} from "./proto/appguard/AppGuardTcpResponse";
 
-const PROTO_FILE = __dirname + '/../proto/appguard.proto'
+const PROTO_FILE = __dirname + '/../appguard-protobuf/appguard.proto'
 const packageDef = protoLoader.loadSync(path.resolve(__dirname, PROTO_FILE))
 const grpcObj = (grpc.loadPackageDefinition(packageDef) as unknown) as ProtoGrpcType
 

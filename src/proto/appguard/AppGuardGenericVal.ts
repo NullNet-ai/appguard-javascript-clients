@@ -1,4 +1,4 @@
-// Original file: proto/appguard.proto
+// Original file: appguard-protobuf/appguard.proto
 
 import type { StringVec as _appguard_StringVec, StringVec__Output as _appguard_StringVec__Output } from '../appguard/StringVec';
 import type { Long } from '@grpc/proto-loader';

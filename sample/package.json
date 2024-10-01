@@ -10,7 +10,7 @@
   "author": "bon",
   "license": "ISC",
   "dependencies": {
-    "@nullnet/app-guard-express": "file:../app-guard-express",
+    "@nullnet/app-guard-express": "file:../",
     "express": "^4.19.2"
   },
   "devDependencies": {
