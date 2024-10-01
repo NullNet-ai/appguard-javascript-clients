@@ -16,9 +16,7 @@
     "build": "tsdx build --format esm",
     "test": "tsdx test",
     "lint": "tsdx lint",
-    "prepare": "cp -R ../proto . & ./proto-gen.sh & tsdx build",
-    "postpack": "rm -rf proto",
-    "postpublish": "rm -rf proto",
+    "prepare": "./proto-gen.sh & tsdx build",
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
