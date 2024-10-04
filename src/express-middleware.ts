@@ -185,7 +185,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
         // attach response handlers after we get the req.id
         attachResponseHandlers(
           res,
-          handleHTTPRequestResponse.reqId as number,
+          handleTCPConnectionResponse.reqId as number,
           handleTCPConnectionResponse.tcpInfo as AppGuardTcpInfo
         );
         next();
