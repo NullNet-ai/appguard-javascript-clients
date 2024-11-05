@@ -4,14 +4,11 @@ import type { AppGuardTcpInfo as _appguard_AppGuardTcpInfo, AppGuardTcpInfo__Out
 
 export interface AppGuardSmtpResponse {
   'code'?: (number);
-  'reqId'?: (number);
   'tcpInfo'?: (_appguard_AppGuardTcpInfo | null);
   '_code'?: "code";
-  '_reqId'?: "reqId";
 }
 
 export interface AppGuardSmtpResponse__Output {
   'code'?: (number);
-  'reqId'?: (number);
   'tcpInfo'?: (_appguard_AppGuardTcpInfo__Output);
 }

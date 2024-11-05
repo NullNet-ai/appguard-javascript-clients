@@ -72,7 +72,6 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
 
   const attachResponseHandlers = (
     res: Response,
-    req_id: number,
     tcp_info: AppGuardTcpInfo
   ) => {
     // Storing the original send function
@@ -96,7 +95,6 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
           headers: genericValReducer(
             response_headers as Record<string, string | number | Array<string>>
           ),
-          reqId: req_id,
           tcpInfo: tcp_info,
         }
       );
@@ -185,7 +183,6 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
         // attach response handlers after we get the req.id
         attachResponseHandlers(
           res,
-          handleTCPConnectionResponse.reqId as number,
           handleTCPConnectionResponse.tcpInfo as AppGuardTcpInfo
         );
         next();
