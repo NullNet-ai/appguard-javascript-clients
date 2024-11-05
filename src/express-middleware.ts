@@ -13,6 +13,8 @@ type ExpressMiddleware = (
 export type AppGuardConfig = {
   host: string;
   port: number;
+  timeoutUsec?: number;
+  defaultPolicy?: FirewallPolicy;
 };
 
 const genericValReducer = (

@@ -1,11 +1,13 @@
 import express from 'express'
-import { createAppGuardMiddleware, AppGuardConfig } from '@nullnet/app-guard-express'
+import {AppGuardConfig, createAppGuardMiddleware, FirewallPolicy} from '@nullnet/app-guard-express'
 
 const app = express()
 
 const appGuardConfig: AppGuardConfig = {
     host: 'localhost',
-    port: 50051
+    port: 50051,
+    timeoutUsec: 1_000_000,
+    defaultPolicy: FirewallPolicy.ALLOW
 }
 
 const router = createAppGuardMiddleware(appGuardConfig)
