@@ -3,6 +3,7 @@ import { AppGuardService } from './app-guard-express';
 import { AppGuardGenericVal } from './proto/appguard/AppGuardGenericVal';
 import { AppGuardTcpInfo } from './proto/appguard/AppGuardTcpInfo';
 import { FirewallPolicy } from './proto/appguard/FirewallPolicy';
+import {AppGuardResponse__Output} from "./proto/appguard/AppGuardResponse";
 
 type ExpressMiddleware = (
   req: Request,
@@ -13,7 +14,7 @@ type ExpressMiddleware = (
 export type AppGuardConfig = {
   host: string;
   port: number;
-  timeoutUsec?: number;
+  timeoutMsec?: number;
   defaultPolicy?: FirewallPolicy;
 };
 
@@ -72,6 +73,19 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
   }
   initialize();
 
+    const waitWhileTimeout = (promise: Promise<AppGuardResponse__Output>) => {
+        if (config.timeoutMsec !== undefined && config.defaultPolicy !== undefined) {
+            let timeoutPromise: Promise<AppGuardResponse__Output> = new Promise((resolve, _reject) => {
+                setTimeout(resolve, config.timeoutMsec, {
+                    policy: config.defaultPolicy
+                })
+            });
+            return Promise.race([promise, timeoutPromise])
+        } else {
+            return promise
+        }
+    }
+
   const attachResponseHandlers = (
     res: Response,
     tcp_info: AppGuardTcpInfo
@@ -89,17 +103,17 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
       const response_headers = res.getHeaders();
 
       // @ts-ignore
-      const handleHTTPResponseResponse = await appGuardService.handleHttpResponse(
-        {
-          // @ts-ignore
-          code: res.statusCode,
-          // @ts-ignore
-          headers: genericValReducer(
-            response_headers as Record<string, string | number | Array<string>>
-          ),
-          tcpInfo: tcp_info,
-        }
-      );
+      const handleHTTPResponseResponse = await waitWhileTimeout(appGuardService.handleHttpResponse(
+          {
+              // @ts-ignore
+              code: res.statusCode,
+              // @ts-ignore
+              headers: genericValReducer(
+                  response_headers as Record<string, string | number | Array<string>>
+              ),
+              tcpInfo: tcp_info,
+          }
+      ));
 
       if (handleHTTPResponseResponse.policy === FirewallPolicy.DENY) {
         // Destroying the socket connection instead of sending the response
@@ -149,7 +163,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
           protocol: req.protocol,
         }
       );
-      const handleHTTPRequestResponse = await appGuardService.handleHttpRequest(
+      const handleHTTPRequestResponse = await waitWhileTimeout(appGuardService.handleHttpRequest(
         {
           // @ts-ignore
           originalUrl: req.originalUrl,
@@ -169,7 +183,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
           ),
           tcpInfo: handleTCPConnectionResponse.tcpInfo,
         }
-      );
+      ));
 
       // console.log(
       //   `Appguard Request Decision- ${FirewallPolicy.ALLOW ? 'Allow' : 'Deny'} `
