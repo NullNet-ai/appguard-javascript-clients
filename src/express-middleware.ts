@@ -4,6 +4,8 @@ import { AppGuardGenericVal } from './proto/appguard/AppGuardGenericVal';
 import { AppGuardTcpInfo } from './proto/appguard/AppGuardTcpInfo';
 import { FirewallPolicy } from './proto/appguard/FirewallPolicy';
 import {AppGuardResponse__Output} from "./proto/appguard/AppGuardResponse";
+import {AppGuardTcpResponse__Output} from "./proto/appguard/AppGuardTcpResponse";
+import {AppGuardTcpConnection} from "./proto/appguard/AppGuardTcpConnection";
 
 type ExpressMiddleware = (
   req: Request,
@@ -14,8 +16,9 @@ type ExpressMiddleware = (
 export type AppGuardConfig = {
   host: string;
   port: number;
-  timeoutMsec?: number;
   defaultPolicy?: FirewallPolicy;
+  firewallTimeout?: number;
+  connectionTimeout?: number;
 };
 
 const genericValReducer = (
@@ -73,11 +76,27 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
   }
   initialize();
 
-    const waitWhileTimeout = (promise: Promise<AppGuardResponse__Output>) => {
-        if (config.timeoutMsec !== undefined && config.defaultPolicy !== undefined) {
+    const firewallPromise = (promise: Promise<AppGuardResponse__Output>): Promise<AppGuardResponse__Output> => {
+        if (config.firewallTimeout !== undefined && config.defaultPolicy !== undefined) {
             let timeoutPromise: Promise<AppGuardResponse__Output> = new Promise((resolve, _reject) => {
-                setTimeout(resolve, config.timeoutMsec, {
+                setTimeout(resolve, config.firewallTimeout, {
                     policy: config.defaultPolicy
+                })
+            });
+            return Promise.race([promise, timeoutPromise])
+        } else {
+            return promise
+        }
+    }
+
+    const connectionPromise = (connection: AppGuardTcpConnection): Promise<AppGuardTcpResponse__Output> => {
+        let promise = appGuardService.handleTcpConnection(connection);
+        if (config.connectionTimeout !== undefined) {
+            let timeoutPromise: Promise<AppGuardTcpResponse__Output> = new Promise((resolve, _reject) => {
+                setTimeout(resolve, config.connectionTimeout, {
+                    tcpInfo: {
+                        connection: connection,
+                    }
                 })
             });
             return Promise.race([promise, timeoutPromise])
@@ -103,7 +122,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
       const response_headers = res.getHeaders();
 
       // @ts-ignore
-      const handleHTTPResponseResponse = await waitWhileTimeout(appGuardService.handleHttpResponse(
+      const handleHTTPResponseResponse = await firewallPromise(appGuardService.handleHttpResponse(
           {
               // @ts-ignore
               code: res.statusCode,
@@ -149,21 +168,21 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
       //   `Appguard Debug From - ${sourceIp} - ${req.method} ${req.originalUrl}`
       // );
 
-      const handleTCPConnectionResponse = await appGuardService.handleTcpConnection(
-        {
-          // @ts-ignore
-          sourceIp: sourceIp,
-          // @ts-ignore
-          sourcePort: req.socket.remotePort,
-          // @ts-ignore
-          destinationIp: req.socket.localAddress,
-          // @ts-ignore
-          destinationPort: req.socket.localPort,
-          // @ts-ignore
-          protocol: req.protocol,
-        }
+      const handleTCPConnectionResponse = await connectionPromise(
+          {
+              // @ts-ignore
+              sourceIp: sourceIp,
+              // @ts-ignore
+              sourcePort: req.socket.remotePort,
+              // @ts-ignore
+              destinationIp: req.socket.localAddress,
+              // @ts-ignore
+              destinationPort: req.socket.localPort,
+              // @ts-ignore
+              protocol: req.protocol,
+          }
       );
-      const handleHTTPRequestResponse = await waitWhileTimeout(appGuardService.handleHttpRequest(
+      const handleHTTPRequestResponse = await firewallPromise(appGuardService.handleHttpRequest(
         {
           // @ts-ignore
           originalUrl: req.originalUrl,

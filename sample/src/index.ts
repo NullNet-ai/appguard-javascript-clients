@@ -6,8 +6,9 @@ const app = express()
 const appGuardConfig: AppGuardConfig = {
     host: 'localhost',
     port: 50051,
-    timeoutMsec: 1_000,
-    defaultPolicy: FirewallPolicy.ALLOW
+    defaultPolicy: FirewallPolicy.ALLOW,
+    firewallTimeout: 1_000,
+    connectionTimeout: 2_000
 }
 
 const router = createAppGuardMiddleware(appGuardConfig)
