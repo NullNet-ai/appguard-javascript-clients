@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router, Send } from 'express';
 import { AppGuardService } from './app-guard-express';
-import { AppGuardGenericVal } from './proto/appguard/AppGuardGenericVal';
+import { AppGuardGenericVal } from './proto/genericval/AppGuardGenericVal';
 import { AppGuardTcpInfo } from './proto/appguard/AppGuardTcpInfo';
 import { FirewallPolicy } from './proto/appguard/FirewallPolicy';
 import {AppGuardResponse__Output} from "./proto/appguard/AppGuardResponse";

@@ -1,4 +1,4 @@
-// Original file: appguard-protobuf/appguard.proto
+// Original file: appguard-protobuf/genericval.proto
 
 
 export interface StringVec {
