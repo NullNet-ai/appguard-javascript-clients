@@ -8,11 +8,14 @@ import { AppGuardResponse__Output } from './proto/appguard/AppGuardResponse'
 import { AppGuardTcpConnection } from './proto/appguard/AppGuardTcpConnection'
 import { AppGuardHttpResponse } from './proto/appguard/AppGuardHttpResponse'
 import {AppGuardTcpResponse__Output} from "./proto/appguard/AppGuardTcpResponse";
+import * as fs from "node:fs";
 
 const PROTO_FILE = __dirname + '/../appguard-protobuf/appguard.proto'
 const packageDef = protoLoader.loadSync(path.resolve(__dirname, PROTO_FILE))
 const grpcObj = (grpc.loadPackageDefinition(packageDef) as unknown) as ProtoGrpcType
 
+const server_ca_pem_file = __dirname + '/../tls/server_ca.pem'
+const server_ca_pem = fs.readFileSync(server_ca_pem_file)
 
 export class AppGuardService {
     private host: string
@@ -21,7 +24,7 @@ export class AppGuardService {
     constructor(host: string, port: number){
         this.host = host
         this.port = port
-        this.client = new grpcObj.appguard.AppGuard(`${this.host}:${this.port}`, grpc.credentials.createInsecure())
+        this.client = new grpcObj.appguard.AppGuard(`${this.host}:${this.port}`, grpc.credentials.createSsl(server_ca_pem))
     }
     async onModuleInit(){
         return new Promise((resolve, reject) => {
