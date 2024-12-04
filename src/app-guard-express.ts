@@ -8,14 +8,20 @@ import { AppGuardResponse__Output } from './proto/appguard/AppGuardResponse'
 import { AppGuardTcpConnection } from './proto/appguard/AppGuardTcpConnection'
 import { AppGuardHttpResponse } from './proto/appguard/AppGuardHttpResponse'
 import {AppGuardTcpResponse__Output} from "./proto/appguard/AppGuardTcpResponse";
-import * as fs from "node:fs";
 
 const PROTO_FILE = __dirname + '/../appguard-protobuf/appguard.proto'
 const packageDef = protoLoader.loadSync(path.resolve(__dirname, PROTO_FILE))
 const grpcObj = (grpc.loadPackageDefinition(packageDef) as unknown) as ProtoGrpcType
 
-const server_ca_pem_file = __dirname + '/../tls/server_ca.pem'
-const server_ca_pem = fs.readFileSync(server_ca_pem_file)
+// it doesn't work with .cer files, convert them to .pem with the following command:
+// openssl x509 -inform der -in ca.cer -out ca.pem
+
+// The NODE_EXTRA_CA_CERTS environment variable is only read when the Node.js process is first launched.
+// Changing the value at runtime has no effect on the current process.
+
+// process.env.NODE_EXTRA_CA_CERTS = __dirname + '/../tls/ca.pem'
+
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 export class AppGuardService {
     private host: string
@@ -24,7 +30,7 @@ export class AppGuardService {
     constructor(host: string, port: number){
         this.host = host
         this.port = port
-        this.client = new grpcObj.appguard.AppGuard(`${this.host}:${this.port}`, grpc.credentials.createSsl(server_ca_pem))
+        this.client = new grpcObj.appguard.AppGuard(`${this.host}:${this.port}`, grpc.credentials.createSsl())
     }
     async onModuleInit(){
         return new Promise((resolve, reject) => {
@@ -32,9 +38,10 @@ export class AppGuardService {
                 if(err){
                     console.log('Error connecting to AppGuard service')
                     reject(err)
+                } else {
+                    console.log('Connected to AppGuard service')
+                    resolve(this)
                 }
-                console.log('Connected to AppGuard service')
-                resolve(this)
             })
         })
 
