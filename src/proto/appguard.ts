@@ -21,9 +21,5 @@ export interface ProtoGrpcType {
     AppGuardTcpResponse: MessageTypeDefinition
     FirewallPolicy: EnumTypeDefinition
   }
-  genericval: {
-    AppGuardGenericVal: MessageTypeDefinition
-    StringVec: MessageTypeDefinition
-  }
 }
 

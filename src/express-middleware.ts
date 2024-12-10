@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response, Send } from 'express';
 import { AppGuardService } from './app-guard-express';
-import { AppGuardGenericVal } from './proto/genericval/AppGuardGenericVal';
 import { AppGuardTcpInfo } from './proto/appguard/AppGuardTcpInfo';
 import { FirewallPolicy } from './proto/appguard/FirewallPolicy';
 import {AppGuardResponse__Output} from "./proto/appguard/AppGuardResponse";
@@ -21,50 +20,6 @@ export type AppGuardConfig = {
   connectionTimeout?: number;
 };
 
-const genericValReducer = (
-  obj: Record<string, string | number | Array<string>>
-): Record<string, AppGuardGenericVal> => {
-  return Object.entries(obj).reduce(
-    (acc, current: [string, string | number | Array<string>]) => {
-      const [key, value] = current;
-      if (typeof value === 'string') {
-        return {
-          ...acc,
-          [key]: {
-            stringVal: value,
-          },
-        };
-      } else if (typeof value === 'number') {
-        if (Number.isInteger(value)) {
-          return {
-            ...acc,
-            [key]: {
-              intVal: value,
-            },
-          };
-        }
-        return {
-          ...acc,
-          [key]: {
-            floatVal: value,
-          },
-        };
-      } else if (Array.isArray(value)) {
-        return {
-          ...acc,
-          [key]: {
-            stringVecVal: {
-              values: value,
-            },
-          },
-        };
-      }
-
-      return acc;
-    },
-    {} as Record<string, AppGuardGenericVal>
-  );
-};
 
 export const createAppGuardMiddleware = (config: AppGuardConfig) => {
   const appGuardService = new AppGuardService(config.host, config.port);
@@ -125,9 +80,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
               // @ts-ignore
               code: res.statusCode,
               // @ts-ignore
-              headers: genericValReducer(
-                  response_headers as Record<string, string | number | Array<string>>
-              ),
+              headers: response_headers as Record<string, string>,
               tcpInfo: tcp_info,
           }
       ));
@@ -185,19 +138,13 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
           // @ts-ignore
           originalUrl: req.originalUrl,
           // @ts-ignore
-          headers: genericValReducer(
-            // @ts-ignore
-            req.headers as Record<string, string | number | Array<string>>
-          ),
+          headers: req.headers as Record<string, string>,
           // @ts-ignore
           method: req.method,
           // @ts-ignore
           body: req.body,
           // @ts-ignore
-          query: genericValReducer(
-            //@ts-ignore
-            req.query as Record<string, string | number | Array<string>>
-          ),
+          query: req.query as Record<string, string>,
           tcpInfo: handleTCPConnectionResponse.tcpInfo,
         }
       ));
