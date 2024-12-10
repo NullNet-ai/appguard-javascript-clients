@@ -24,13 +24,9 @@ const grpcObj = (grpc.loadPackageDefinition(packageDef) as unknown) as ProtoGrpc
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 export class AppGuardService {
-    private host: string
-    private port: number
     private client: AppGuardClient
     constructor(host: string, port: number){
-        this.host = host
-        this.port = port
-        this.client = new grpcObj.appguard.AppGuard(`${this.host}:${this.port}`, grpc.credentials.createSsl())
+        this.client = new grpcObj.appguard.AppGuard(`${host}:${port}`, grpc.credentials.createSsl())
     }
     async onModuleInit(){
         return new Promise((resolve, reject) => {

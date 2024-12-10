@@ -11,7 +11,7 @@ const appGuardConfig: AppGuardConfig = {
     connectionTimeout: 2_000
 }
 
-const router = createAppGuardMiddleware(appGuardConfig)
+const appGuardMiddleware = createAppGuardMiddleware(appGuardConfig)
 
 // AC #1:
 // Able to use as direct express module
@@ -20,17 +20,17 @@ const router = createAppGuardMiddleware(appGuardConfig)
 
 // AC #2: 
 // Able to use as middleware to specific route
-app.get('/some-route', router, async (req, res) => {
+app.get('/some-route', appGuardMiddleware, async (req, res) => {
     res.json({message: 'Hello World'})
 })
 
-app.get('/index' , router, async (req, res) => {
+app.get('/index' , appGuardMiddleware, async (req, res) => {
     res.json({message: 'Hello World'})
 })
 
 // AC #3:
 // Able to uses a default route controller
-app.get('*' , router, async (req, res) => {
+app.get('*' , appGuardMiddleware, async (req, res) => {
     res.json({message: 'Hello World'})
 })
 

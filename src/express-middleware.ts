@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, Router, Send } from 'express';
+import { NextFunction, Request, Response, Send } from 'express';
 import { AppGuardService } from './app-guard-express';
 import { AppGuardGenericVal } from './proto/genericval/AppGuardGenericVal';
 import { AppGuardTcpInfo } from './proto/appguard/AppGuardTcpInfo';
@@ -68,8 +68,6 @@ const genericValReducer = (
 
 export const createAppGuardMiddleware = (config: AppGuardConfig) => {
   const appGuardService = new AppGuardService(config.host, config.port);
-
-  const router = Router();
 
   async function initialize() {
     await appGuardService.onModuleInit();
@@ -232,7 +230,5 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
     }
   };
 
-  router.use(handleIncomingRequest);
-
-  return router;
+  return handleIncomingRequest;
 };
