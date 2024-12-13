@@ -15,14 +15,14 @@ type ExpressMiddleware = (
 export type AppGuardConfig = {
   host: string;
   port: number;
-  defaultPolicy?: FirewallPolicy;
-  firewallTimeout?: number;
-  connectionTimeout?: number;
+  tls: boolean;
+  timeout?: number;
+  defaultPolicy: FirewallPolicy;
 };
 
 
 export const createAppGuardMiddleware = (config: AppGuardConfig) => {
-  const appGuardService = new AppGuardService(config.host, config.port);
+  const appGuardService = new AppGuardService(config.host, config.port, config.tls);
 
   async function initialize() {
     await appGuardService.onModuleInit();
@@ -30,9 +30,9 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
   initialize();
 
     const firewallPromise = (promise: Promise<AppGuardResponse__Output>): Promise<AppGuardResponse__Output> => {
-        if (config.firewallTimeout !== undefined && config.defaultPolicy !== undefined) {
+        if (config.timeout !== undefined) {
             let timeoutPromise: Promise<AppGuardResponse__Output> = new Promise((resolve, _reject) => {
-                setTimeout(resolve, config.firewallTimeout, {
+                setTimeout(resolve, config.timeout, {
                     policy: config.defaultPolicy
                 })
             });
@@ -44,9 +44,9 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
 
     const connectionPromise = (connection: AppGuardTcpConnection): Promise<AppGuardTcpResponse__Output> => {
         let promise = appGuardService.handleTcpConnection(connection);
-        if (config.connectionTimeout !== undefined) {
+        if (config.timeout !== undefined) {
             let timeoutPromise: Promise<AppGuardTcpResponse__Output> = new Promise((resolve, _reject) => {
-                setTimeout(resolve, config.connectionTimeout, {
+                setTimeout(resolve, config.timeout, {
                     tcpInfo: {
                         connection: connection,
                     }
