@@ -5,6 +5,7 @@ import { FirewallPolicy } from './proto/appguard/FirewallPolicy';
 import {AppGuardResponse__Output} from "./proto/appguard/AppGuardResponse";
 import {AppGuardTcpResponse__Output} from "./proto/appguard/AppGuardTcpResponse";
 import {AppGuardTcpConnection} from "./proto/appguard/AppGuardTcpConnection";
+import {AuthHandler} from "./auth";
 
 type ExpressMiddleware = (
   req: Request,
@@ -23,6 +24,7 @@ export type AppGuardConfig = {
 
 export const createAppGuardMiddleware = (config: AppGuardConfig) => {
   const appGuardService = new AppGuardService(config.host, config.port, config.tls);
+  let authHandler = new AuthHandler(appGuardService);
 
   async function initialize() {
     await appGuardService.onModuleInit();
@@ -82,6 +84,8 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
               // @ts-ignore
               headers: response_headers as Record<string, string>,
               tcpInfo: tcp_info,
+              // @ts-ignore
+              token: authHandler.token
           }
       ));
 
@@ -131,6 +135,8 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
               destinationPort: req.socket.localPort,
               // @ts-ignore
               protocol: req.protocol,
+              // @ts-ignore
+              token: authHandler.token
           }
       );
       const handleHTTPRequestResponse = await firewallPromise(appGuardService.handleHttpRequest(
@@ -146,6 +152,8 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
           // @ts-ignore
           query: req.query as Record<string, string>,
           tcpInfo: handleTCPConnectionResponse.tcpInfo,
+          // @ts-ignore
+          token: authHandler.token
         }
       ));
 

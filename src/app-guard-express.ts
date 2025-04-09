@@ -1,13 +1,17 @@
 import path from 'path'
 import * as grpc from '@grpc/grpc-js'
 import * as protoLoader from '@grpc/proto-loader'
-import type  {ProtoGrpcType} from './proto/appguard'
-import { AppGuardClient } from './proto/appguard/AppGuard'
-import { AppGuardHttpRequest } from './proto/appguard/AppGuardHttpRequest'
-import { AppGuardResponse__Output } from './proto/appguard/AppGuardResponse'
-import { AppGuardTcpConnection } from './proto/appguard/AppGuardTcpConnection'
-import { AppGuardHttpResponse } from './proto/appguard/AppGuardHttpResponse'
+import type {ProtoGrpcType} from './proto/appguard'
+import {AppGuardClient} from './proto/appguard/AppGuard'
+import {AppGuardHttpRequest} from './proto/appguard/AppGuardHttpRequest'
+import {AppGuardResponse__Output} from './proto/appguard/AppGuardResponse'
+import {AppGuardTcpConnection} from './proto/appguard/AppGuardTcpConnection'
+import {AppGuardHttpResponse} from './proto/appguard/AppGuardHttpResponse'
 import {AppGuardTcpResponse__Output} from "./proto/appguard/AppGuardTcpResponse";
+import {HeartbeatRequest} from "./proto/appguard/HeartbeatRequest";
+import {HeartbeatResponse__Output} from "./proto/appguard/HeartbeatResponse";
+import {DeviceStatus} from "./proto/appguard/DeviceStatus";
+import {AuthHandler} from "./auth";
 
 const PROTO_FILE = __dirname + '/../appguard-protobuf/appguard.proto'
 const packageDef = protoLoader.loadSync(path.resolve(__dirname, PROTO_FILE))
@@ -78,5 +82,26 @@ export class AppGuardService {
                 }
             })
         })
+    }
+    async heartbeat(req: HeartbeatRequest, auth: AuthHandler) {
+        let call = this.client.heartbeat(req);
+        call.on('data', function(heartbeat: HeartbeatResponse__Output) {
+            // handle the heartbeat response
+            auth.token = heartbeat.token;
+            let status = heartbeat.status;
+            if (status == DeviceStatus.DS_ARCHIVED || status == DeviceStatus.DS_DELETED) {
+                // terminate current process
+                console.log("Device is archived or deleted, terminating process");
+                process.exit(0);
+            }
+        });
+        call.on('error', (_e) => {
+            // An error has occurred and the stream has been closed.
+            // sleep for 5 seconds and try again
+            console.log("Error in heartbeat, retrying in 10 seconds");
+            setTimeout(() => {
+                this.heartbeat(req, auth);
+            }, 10000);
+        });
     }
 }

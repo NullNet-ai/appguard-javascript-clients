@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package appguard;
+
+service AppGuard {
+  // Authentication
+  rpc Heartbeat (HeartbeatRequest) returns (stream HeartbeatResponse);
+  // TCP
+  rpc HandleTcpConnection (AppGuardTcpConnection) returns (AppGuardTcpResponse);
+  // HTTP
+  rpc HandleHttpRequest (AppGuardHttpRequest) returns (AppGuardResponse);
+  rpc HandleHttpResponse (AppGuardHttpResponse) returns (AppGuardResponse);
+  // SMTP
+  rpc HandleSmtpRequest (AppGuardSmtpRequest) returns (AppGuardResponse);
+  rpc HandleSmtpResponse (AppGuardSmtpResponse) returns (AppGuardResponse);
+}
+
+// Authentication ------------------------------------------------------------------------------------------------------
+
+message HeartbeatRequest {
+  string app_id = 1;
+  string app_secret = 2;
+  string device_version = 3;
+  string device_uuid = 4;
+}
+
+enum DeviceStatus {
+  DS_DRAFT = 0;
+  DS_ACTIVE = 1;
+  DS_ARCHIVED = 2;
+  DS_DELETED = 3;
+  DS_UNKNOWN = 4;
+}
+
+message HeartbeatResponse {
+  string token = 1;
+  DeviceStatus status = 2;
+  bool remote_shell_enabled = 3;
+  bool remote_ui_enabled = 4;
+  bool is_monitoring_enabled = 5;
+}
+
+// TCP -----------------------------------------------------------------------------------------------------------------
+
+message AppGuardTcpConnection {
+  string token = 1;
+  optional string source_ip = 2;
+  optional uint32 source_port = 3;
+  optional string destination_ip = 4;
+  optional uint32 destination_port = 5;
+  string protocol = 6;
+}
+
+message AppGuardIpInfo {
+  string ip = 1;
+  optional string country = 2;
+  optional string asn = 3;
+  optional string org = 4;
+  optional string continent_code = 5;
+  optional string city = 6;
+  optional string region = 7;
+  optional string postal = 8;
+  optional string timezone = 9;
+  bool blacklist = 100;
+}
+
+message AppGuardTcpInfo {
+  AppGuardTcpConnection connection = 1;
+  AppGuardIpInfo ip_info = 2;
+  uint64 tcp_id = 3;
+}
+
+// HTTP ----------------------------------------------------------------------------------------------------------------
+
+message AppGuardHttpRequest {
+  string token = 1;
+  string original_url = 2;
+  map<string, string> headers = 3;
+  string method = 4;
+  optional string body = 5;
+  map<string, string> query = 6;
+  AppGuardTcpInfo tcp_info = 100;
+}
+
+message AppGuardHttpResponse {
+  string token = 1;
+  uint32 code = 2;
+  map<string, string> headers = 3;
+  AppGuardTcpInfo tcp_info = 100;
+}
+
+// SMTP ----------------------------------------------------------------------------------------------------------------
+
+message AppGuardSmtpRequest {
+  string token = 1;
+  map<string, string> headers = 2;
+  optional string body = 3;
+  AppGuardTcpInfo tcp_info = 100;
+}
+
+message AppGuardSmtpResponse {
+  string token = 1;
+  optional uint32 code = 2;
+  AppGuardTcpInfo tcp_info = 100;
+}
+
+// Response ------------------------------------------------------------------------------------------------------------
+
+message AppGuardResponse {
+  FirewallPolicy policy = 2;
+}
+
+message AppGuardTcpResponse {
+  AppGuardTcpInfo tcp_info = 1;
+}
+
+enum FirewallPolicy {
+  UNKNOWN = 0;
+  ALLOW = 1;
+  DENY = 2;
+}

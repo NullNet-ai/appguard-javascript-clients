@@ -1,7 +1,8 @@
-// Original file: appguard-protobuf/appguard.proto
+// Original file: proto/appguard.proto
 
 
 export interface AppGuardTcpConnection {
+  'token'?: (string);
   'sourceIp'?: (string);
   'sourcePort'?: (number);
   'destinationIp'?: (string);
@@ -14,6 +15,7 @@ export interface AppGuardTcpConnection {
 }
 
 export interface AppGuardTcpConnection__Output {
+  'token'?: (string);
   'sourceIp'?: (string);
   'sourcePort'?: (number);
   'destinationIp'?: (string);

@@ -1,4 +1,4 @@
-// Original file: appguard-protobuf/appguard.proto
+// Original file: proto/appguard.proto
 
 
 export interface AppGuardIpInfo {
@@ -11,7 +11,7 @@ export interface AppGuardIpInfo {
   'region'?: (string);
   'postal'?: (string);
   'timezone'?: (string);
-  'blacklist'?: (number);
+  'blacklist'?: (boolean);
   '_country'?: "country";
   '_asn'?: "asn";
   '_org'?: "org";
@@ -32,5 +32,5 @@ export interface AppGuardIpInfo__Output {
   'region'?: (string);
   'postal'?: (string);
   'timezone'?: (string);
-  'blacklist'?: (number);
+  'blacklist'?: (boolean);
 }
