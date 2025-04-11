@@ -24,12 +24,13 @@ export type AppGuardConfig = {
 
 export const createAppGuardMiddleware = (config: AppGuardConfig) => {
   const appGuardService = new AppGuardService(config.host, config.port, config.tls);
-  let authHandler = new AuthHandler(appGuardService);
-
   async function initialize() {
     await appGuardService.onModuleInit();
   }
   initialize();
+
+  let authHandler = new AuthHandler(appGuardService);
+  authHandler.init();
 
     const firewallPromise = (promise: Promise<AppGuardResponse__Output>): Promise<AppGuardResponse__Output> => {
         if (config.timeout !== undefined) {
@@ -85,7 +86,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
               headers: response_headers as Record<string, string>,
               tcpInfo: tcp_info,
               // @ts-ignore
-              token: authHandler.token
+              token: authHandler.token()
           }
       ));
 
@@ -136,7 +137,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
               // @ts-ignore
               protocol: req.protocol,
               // @ts-ignore
-              token: authHandler.token
+              token: authHandler.token()
           }
       );
       const handleHTTPRequestResponse = await firewallPromise(appGuardService.handleHttpRequest(
@@ -153,7 +154,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
           query: req.query as Record<string, string>,
           tcpInfo: handleTCPConnectionResponse.tcpInfo,
           // @ts-ignore
-          token: authHandler.token
+          token: authHandler.token()
         }
       ));
 

@@ -11,9 +11,9 @@ import {AppGuardTcpResponse__Output} from "./proto/appguard/AppGuardTcpResponse"
 import {HeartbeatRequest} from "./proto/appguard/HeartbeatRequest";
 import {HeartbeatResponse__Output} from "./proto/appguard/HeartbeatResponse";
 import {DeviceStatus} from "./proto/appguard/DeviceStatus";
-import {AuthHandler} from "./auth";
+import {TOKEN_FILE} from "./auth";
 
-const PROTO_FILE = __dirname + '/../appguard-protobuf/appguard.proto'
+const PROTO_FILE = __dirname + '/../proto/appguard.proto'
 const packageDef = protoLoader.loadSync(path.resolve(__dirname, PROTO_FILE))
 const grpcObj = (grpc.loadPackageDefinition(packageDef) as unknown) as ProtoGrpcType
 
@@ -83,11 +83,14 @@ export class AppGuardService {
             })
         })
     }
-    async heartbeat(req: HeartbeatRequest, auth: AuthHandler) {
+    heartbeat(req: HeartbeatRequest) {
         let call = this.client.heartbeat(req);
         call.on('data', function(heartbeat: HeartbeatResponse__Output) {
             // handle the heartbeat response
-            auth.token = heartbeat.token;
+            console.log("Received heartbeat from server");
+            // write token to file
+            const fs = require('fs');
+            fs.writeFileSync(TOKEN_FILE, heartbeat.token, {flag: 'w'});
             let status = heartbeat.status;
             if (status == DeviceStatus.DS_ARCHIVED || status == DeviceStatus.DS_DELETED) {
                 // terminate current process
@@ -97,10 +100,10 @@ export class AppGuardService {
         });
         call.on('error', (_e) => {
             // An error has occurred and the stream has been closed.
-            // sleep for 5 seconds and try again
+            // sleep for 10 seconds and try again
             console.log("Error in heartbeat, retrying in 10 seconds");
             setTimeout(() => {
-                this.heartbeat(req, auth);
+                this.heartbeat(req);
             }, 10000);
         });
     }
