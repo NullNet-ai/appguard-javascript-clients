@@ -19,7 +19,10 @@ export interface ProtoGrpcType {
     AppGuardTcpConnection: MessageTypeDefinition
     AppGuardTcpInfo: MessageTypeDefinition
     AppGuardTcpResponse: MessageTypeDefinition
+    DeviceStatus: EnumTypeDefinition
     FirewallPolicy: EnumTypeDefinition
+    HeartbeatRequest: MessageTypeDefinition
+    HeartbeatResponse: MessageTypeDefinition
   }
 }
 

@@ -1,4 +1,4 @@
-// Original file: appguard-protobuf/appguard.proto
+// Original file: proto/appguard.proto
 
 import type * as grpc from '@grpc/grpc-js'
 import type { MethodDefinition } from '@grpc/proto-loader'
@@ -9,6 +9,8 @@ import type { AppGuardSmtpRequest as _appguard_AppGuardSmtpRequest, AppGuardSmtp
 import type { AppGuardSmtpResponse as _appguard_AppGuardSmtpResponse, AppGuardSmtpResponse__Output as _appguard_AppGuardSmtpResponse__Output } from '../appguard/AppGuardSmtpResponse';
 import type { AppGuardTcpConnection as _appguard_AppGuardTcpConnection, AppGuardTcpConnection__Output as _appguard_AppGuardTcpConnection__Output } from '../appguard/AppGuardTcpConnection';
 import type { AppGuardTcpResponse as _appguard_AppGuardTcpResponse, AppGuardTcpResponse__Output as _appguard_AppGuardTcpResponse__Output } from '../appguard/AppGuardTcpResponse';
+import type { HeartbeatRequest as _appguard_HeartbeatRequest, HeartbeatRequest__Output as _appguard_HeartbeatRequest__Output } from '../appguard/HeartbeatRequest';
+import type { HeartbeatResponse as _appguard_HeartbeatResponse, HeartbeatResponse__Output as _appguard_HeartbeatResponse__Output } from '../appguard/HeartbeatResponse';
 
 export interface AppGuardClient extends grpc.Client {
   HandleHttpRequest(argument: _appguard_AppGuardHttpRequest, metadata: grpc.Metadata, options: grpc.CallOptions, callback: grpc.requestCallback<_appguard_AppGuardResponse__Output>): grpc.ClientUnaryCall;
@@ -56,6 +58,11 @@ export interface AppGuardClient extends grpc.Client {
   handleTcpConnection(argument: _appguard_AppGuardTcpConnection, options: grpc.CallOptions, callback: grpc.requestCallback<_appguard_AppGuardTcpResponse__Output>): grpc.ClientUnaryCall;
   handleTcpConnection(argument: _appguard_AppGuardTcpConnection, callback: grpc.requestCallback<_appguard_AppGuardTcpResponse__Output>): grpc.ClientUnaryCall;
   
+  Heartbeat(argument: _appguard_HeartbeatRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_appguard_HeartbeatResponse__Output>;
+  Heartbeat(argument: _appguard_HeartbeatRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_appguard_HeartbeatResponse__Output>;
+  heartbeat(argument: _appguard_HeartbeatRequest, metadata: grpc.Metadata, options?: grpc.CallOptions): grpc.ClientReadableStream<_appguard_HeartbeatResponse__Output>;
+  heartbeat(argument: _appguard_HeartbeatRequest, options?: grpc.CallOptions): grpc.ClientReadableStream<_appguard_HeartbeatResponse__Output>;
+  
 }
 
 export interface AppGuardHandlers extends grpc.UntypedServiceImplementation {
@@ -69,6 +76,8 @@ export interface AppGuardHandlers extends grpc.UntypedServiceImplementation {
   
   HandleTcpConnection: grpc.handleUnaryCall<_appguard_AppGuardTcpConnection__Output, _appguard_AppGuardTcpResponse>;
   
+  Heartbeat: grpc.handleServerStreamingCall<_appguard_HeartbeatRequest__Output, _appguard_HeartbeatResponse>;
+  
 }
 
 export interface AppGuardDefinition extends grpc.ServiceDefinition {
@@ -77,4 +86,5 @@ export interface AppGuardDefinition extends grpc.ServiceDefinition {
   HandleSmtpRequest: MethodDefinition<_appguard_AppGuardSmtpRequest, _appguard_AppGuardResponse, _appguard_AppGuardSmtpRequest__Output, _appguard_AppGuardResponse__Output>
   HandleSmtpResponse: MethodDefinition<_appguard_AppGuardSmtpResponse, _appguard_AppGuardResponse, _appguard_AppGuardSmtpResponse__Output, _appguard_AppGuardResponse__Output>
   HandleTcpConnection: MethodDefinition<_appguard_AppGuardTcpConnection, _appguard_AppGuardTcpResponse, _appguard_AppGuardTcpConnection__Output, _appguard_AppGuardTcpResponse__Output>
+  Heartbeat: MethodDefinition<_appguard_HeartbeatRequest, _appguard_HeartbeatResponse, _appguard_HeartbeatRequest__Output, _appguard_HeartbeatResponse__Output>
 }
