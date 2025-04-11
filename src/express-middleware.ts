@@ -24,13 +24,13 @@ export type AppGuardConfig = {
 
 export const createAppGuardMiddleware = (config: AppGuardConfig) => {
   const appGuardService = new AppGuardService(config.host, config.port, config.tls);
+  let authHandler = new AuthHandler(appGuardService);
+
   async function initialize() {
     await appGuardService.onModuleInit();
+    await authHandler.init();
   }
   initialize();
-
-  let authHandler = new AuthHandler(appGuardService);
-  authHandler.init();
 
     const firewallPromise = (promise: Promise<AppGuardResponse__Output>): Promise<AppGuardResponse__Output> => {
         if (config.timeout !== undefined) {
