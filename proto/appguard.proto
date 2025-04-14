@@ -20,24 +20,19 @@ service AppGuard {
 message HeartbeatRequest {
   string app_id = 1;
   string app_secret = 2;
-  string device_version = 3;
-  string device_uuid = 4;
 }
 
 enum DeviceStatus {
-  DS_DRAFT = 0;
-  DS_ACTIVE = 1;
-  DS_ARCHIVED = 2;
-  DS_DELETED = 3;
+  DRAFT = 0;
+  ACTIVE = 1;
+  ARCHIVED = 2;
+  DELETED = 3;
   DS_UNKNOWN = 4;
 }
 
 message HeartbeatResponse {
   string token = 1;
   DeviceStatus status = 2;
-  bool remote_shell_enabled = 3;
-  bool remote_ui_enabled = 4;
-  bool is_monitoring_enabled = 5;
 }
 
 // TCP -----------------------------------------------------------------------------------------------------------------
