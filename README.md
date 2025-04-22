@@ -1,3 +1,3 @@
-# AppGuard-express
+# appguard-express
 
-AppGuard client for Express.
+Express middleware for [AppGuard](https://github.com/NullNet-ai/appguard-server).
