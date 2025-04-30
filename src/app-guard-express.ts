@@ -12,6 +12,7 @@ import {HeartbeatRequest} from "./proto/appguard/HeartbeatRequest";
 import {HeartbeatResponse__Output} from "./proto/appguard/HeartbeatResponse";
 import {DeviceStatus} from "./proto/appguard/DeviceStatus";
 import {TOKEN_FILE} from "./auth";
+import {AppGuardFirewall, AppGuardFirewall__Output} from "./proto/appguard/AppGuardFirewall";
 
 const PROTO_FILE = __dirname + '/../proto/appguard.proto'
 const packageDef = protoLoader.loadSync(path.resolve(__dirname, PROTO_FILE))
@@ -92,7 +93,7 @@ export class AppGuardService {
             const fs = require('fs');
             fs.writeFileSync(TOKEN_FILE, heartbeat.token, {flag: 'w'});
             let status = heartbeat.status;
-            if (status == DeviceStatus.DS_ARCHIVED || status == DeviceStatus.DS_DELETED) {
+            if (status == DeviceStatus.ARCHIVED || status == DeviceStatus.DELETED) {
                 // terminate current process
                 console.log("Device is archived or deleted, terminating process");
                 process.exit(0);
@@ -106,5 +107,16 @@ export class AppGuardService {
                 this.heartbeat(req);
             }, 10000);
         });
+    }
+    async updateFirewall(req: AppGuardFirewall): Promise<AppGuardFirewall__Output>{
+        return new Promise((resolve, reject) => {
+            this.client.updateFirewall(req, (err, res) => {
+                if(err){
+                    reject(err)
+                } else {
+                    resolve(res as AppGuardFirewall__Output)
+                }
+            })
+        })
     }
 }

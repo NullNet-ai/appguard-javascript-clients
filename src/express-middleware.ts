@@ -19,6 +19,7 @@ export type AppGuardConfig = {
   tls: boolean;
   timeout?: number;
   defaultPolicy: FirewallPolicy;
+  firewall: string;
 };
 
 
@@ -29,6 +30,12 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
   async function initialize() {
     await appGuardService.onModuleInit();
     await authHandler.init();
+    await appGuardService.updateFirewall({
+        // @ts-ignore
+        token: authHandler.token(),
+        // @ts-ignore
+        firewall: config.firewall
+    })
   }
   initialize();
 

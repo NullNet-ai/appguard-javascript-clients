@@ -10,6 +10,7 @@ type SubtypeConstructor<Constructor extends new (...args: any) => any, Subtype> 
 export interface ProtoGrpcType {
   appguard: {
     AppGuard: SubtypeConstructor<typeof grpc.Client, _appguard_AppGuardClient> & { service: _appguard_AppGuardDefinition }
+    AppGuardFirewall: MessageTypeDefinition
     AppGuardHttpRequest: MessageTypeDefinition
     AppGuardHttpResponse: MessageTypeDefinition
     AppGuardIpInfo: MessageTypeDefinition
@@ -20,6 +21,7 @@ export interface ProtoGrpcType {
     AppGuardTcpInfo: MessageTypeDefinition
     AppGuardTcpResponse: MessageTypeDefinition
     DeviceStatus: EnumTypeDefinition
+    Empty: MessageTypeDefinition
     FirewallPolicy: EnumTypeDefinition
     HeartbeatRequest: MessageTypeDefinition
     HeartbeatResponse: MessageTypeDefinition

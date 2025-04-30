@@ -8,7 +8,8 @@ const appGuardConfig: AppGuardConfig = {
     port: 50051,
     tls: false,
     defaultPolicy: FirewallPolicy.ALLOW,
-    timeout: 1_000
+    timeout: 1_000,
+    firewall: "[]",
 }
 
 const appGuardMiddleware = createAppGuardMiddleware(appGuardConfig)
