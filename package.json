@@ -1,6 +1,6 @@
 {
   "version": "0.2.9",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
