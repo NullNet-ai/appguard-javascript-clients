@@ -1,11 +1,5 @@
 import { NextFunction, Request, Response, Send } from 'express';
-import { AppGuardService } from './app-guard-express';
-import { AppGuardTcpInfo } from './proto/appguard/AppGuardTcpInfo';
-import { FirewallPolicy } from './proto/appguard/FirewallPolicy';
-import {AppGuardResponse__Output} from "./proto/appguard/AppGuardResponse";
-import {AppGuardTcpResponse__Output} from "./proto/appguard/AppGuardTcpResponse";
-import {AppGuardTcpConnection} from "./proto/appguard/AppGuardTcpConnection";
-import {AuthHandler} from "./auth";
+import { FirewallPolicy, AppGuardTcpInfo, AppGuardService, AuthHandler, AppGuardConfig } from 'appguard-client-common';
 
 type ExpressMiddleware = (
   req: Request,
@@ -13,18 +7,8 @@ type ExpressMiddleware = (
   next: NextFunction
 ) => void | Promise<void>;
 
-export type AppGuardConfig = {
-  host: string;
-  port: number;
-  tls: boolean;
-  timeout?: number;
-  defaultPolicy: FirewallPolicy;
-  firewall: string;
-};
-
-
 export const createAppGuardMiddleware = (config: AppGuardConfig) => {
-  const appGuardService = new AppGuardService(config.host, config.port, config.tls);
+  const appGuardService = new AppGuardService(config);
   let authHandler = new AuthHandler(appGuardService);
 
   async function initialize() {
@@ -38,35 +22,6 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
     })
   }
   initialize();
-
-    const firewallPromise = (promise: Promise<AppGuardResponse__Output>): Promise<AppGuardResponse__Output> => {
-        if (config.timeout !== undefined) {
-            let timeoutPromise: Promise<AppGuardResponse__Output> = new Promise((resolve, _reject) => {
-                setTimeout(resolve, config.timeout, {
-                    policy: config.defaultPolicy
-                })
-            });
-            return Promise.race([promise, timeoutPromise])
-        } else {
-            return promise
-        }
-    }
-
-    const connectionPromise = (connection: AppGuardTcpConnection): Promise<AppGuardTcpResponse__Output> => {
-        let promise = appGuardService.handleTcpConnection(connection);
-        if (config.timeout !== undefined) {
-            let timeoutPromise: Promise<AppGuardTcpResponse__Output> = new Promise((resolve, _reject) => {
-                setTimeout(resolve, config.timeout, {
-                    tcpInfo: {
-                        connection: connection,
-                    }
-                })
-            });
-            return Promise.race([promise, timeoutPromise])
-        } else {
-            return promise
-        }
-    }
 
   const attachResponseHandlers = (
     res: Response,
@@ -85,7 +40,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
       const response_headers = res.getHeaders();
 
       // @ts-ignore
-      const handleHTTPResponseResponse = await firewallPromise(appGuardService.handleHttpResponse(
+      const handleHTTPResponseResponse = await appGuardService.firewallPromise(appGuardService.handleHttpResponse(
           {
               // @ts-ignore
               code: res.statusCode,
@@ -131,7 +86,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
       //   `Appguard Debug From - ${sourceIp} - ${req.method} ${req.originalUrl}`
       // );
 
-      const handleTCPConnectionResponse = await connectionPromise(
+      const handleTCPConnectionResponse = await appGuardService.connectionPromise(
           {
               // @ts-ignore
               sourceIp: sourceIp,
@@ -147,7 +102,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
               token: authHandler.token()
           }
       );
-      const handleHTTPRequestResponse = await firewallPromise(appGuardService.handleHttpRequest(
+      const handleHTTPRequestResponse = await appGuardService.firewallPromise(appGuardService.handleHttpRequest(
         {
           // @ts-ignore
           originalUrl: req.originalUrl,

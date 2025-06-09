@@ -1,2 +1,2 @@
-export {createAppGuardMiddleware, AppGuardConfig} from './express-middleware';
-export {FirewallPolicy} from "./proto/appguard/FirewallPolicy";
+export {createAppGuardMiddleware} from './express-middleware';
+export {FirewallPolicy, AppGuardConfig} from "appguard-client-common";

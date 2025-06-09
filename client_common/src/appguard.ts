@@ -1,4 +1,3 @@
-import path from 'path'
 import * as grpc from '@grpc/grpc-js'
 import * as protoLoader from '@grpc/proto-loader'
 import type {ProtoGrpcType} from './proto/appguard'
@@ -13,9 +12,10 @@ import {HeartbeatResponse__Output} from "./proto/appguard/HeartbeatResponse";
 import {DeviceStatus} from "./proto/appguard/DeviceStatus";
 import {TOKEN_FILE} from "./auth";
 import {AppGuardFirewall, AppGuardFirewall__Output} from "./proto/appguard/AppGuardFirewall";
+import {FirewallPolicy} from "./proto/appguard/FirewallPolicy";
 
-const PROTO_FILE = __dirname + '/../proto/appguard.proto'
-const packageDef = protoLoader.loadSync(path.resolve(__dirname, PROTO_FILE))
+const PROTO_FILE = process.cwd() + '/../proto/appguard.proto'
+const packageDef = protoLoader.loadSync(PROTO_FILE)
 const grpcObj = (grpc.loadPackageDefinition(packageDef) as unknown) as ProtoGrpcType
 
 // it doesn't work with .cer files, convert them to .pem with the following command:
@@ -28,13 +28,25 @@ const grpcObj = (grpc.loadPackageDefinition(packageDef) as unknown) as ProtoGrpc
 
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
+export type AppGuardConfig = {
+    host: string;
+    port: number;
+    tls: boolean;
+    timeout?: number;
+    defaultPolicy: FirewallPolicy;
+    firewall: string;
+};
+
 export class AppGuardService {
     private client: AppGuardClient
-    constructor(host: string, port: number, tls: boolean){
+    private config: AppGuardConfig
+
+    constructor(config: AppGuardConfig){
         this.client = new grpcObj.appguard.AppGuard(
-            `${host}:${port}`,
-            tls ? grpc.credentials.createSsl() : grpc.credentials.createInsecure()
-        )
+            `${config.host}:${config.port}`,
+            config.tls ? grpc.credentials.createSsl() : grpc.credentials.createInsecure()
+        );
+        this.config = config;
     }
     async onModuleInit(){
         return new Promise((resolve, reject) => {
@@ -62,6 +74,7 @@ export class AppGuardService {
             })
         })
     }
+
     async handleHttpResponse(req: AppGuardHttpResponse): Promise<AppGuardResponse__Output>{
         return new Promise((resolve, reject) => {
             this.client.handleHttpResponse(req, (err, res) => {
@@ -73,6 +86,7 @@ export class AppGuardService {
             })
         })
     }
+
     async handleTcpConnection(req: AppGuardTcpConnection): Promise<AppGuardTcpResponse__Output>{
         return new Promise((resolve, reject) => {
             this.client.handleTcpConnection(req, (err, res) => {
@@ -84,6 +98,36 @@ export class AppGuardService {
             })
         })
     }
+
+    firewallPromise = (promise: Promise<AppGuardResponse__Output>): Promise<AppGuardResponse__Output> => {
+        if (this.config.timeout !== undefined) {
+            let timeoutPromise: Promise<AppGuardResponse__Output> = new Promise((resolve, _reject) => {
+                setTimeout(resolve, this.config.timeout, {
+                    policy: this.config.defaultPolicy
+                })
+            });
+            return Promise.race([promise, timeoutPromise])
+        } else {
+            return promise
+        }
+    }
+
+    connectionPromise = (connection: AppGuardTcpConnection): Promise<AppGuardTcpResponse__Output> => {
+        let promise = this.handleTcpConnection(connection);
+        if (this.config.timeout !== undefined) {
+            let timeoutPromise: Promise<AppGuardTcpResponse__Output> = new Promise((resolve, _reject) => {
+                setTimeout(resolve, this.config.timeout, {
+                    tcpInfo: {
+                        connection: connection,
+                    }
+                })
+            });
+            return Promise.race([promise, timeoutPromise])
+        } else {
+            return promise
+        }
+    }
+
     heartbeat(req: HeartbeatRequest) {
         let call = this.client.heartbeat(req);
         call.on('data', function(heartbeat: HeartbeatResponse__Output) {
@@ -108,6 +152,7 @@ export class AppGuardService {
             }, 10000);
         });
     }
+
     async updateFirewall(req: AppGuardFirewall): Promise<AppGuardFirewall__Output>{
         return new Promise((resolve, reject) => {
             this.client.updateFirewall(req, (err, res) => {

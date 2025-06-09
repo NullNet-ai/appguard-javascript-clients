@@ -1,4 +1,4 @@
-import {AppGuardService} from "./app-guard-nextjs";
+import {AppGuardService} from "./appguard";
 import {HeartbeatRequest} from "./proto/appguard/HeartbeatRequest";
 
 export const TOKEN_FILE = process.cwd() + '/../token.txt'
