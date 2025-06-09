@@ -24,7 +24,7 @@ const grpcObj = (grpc.loadPackageDefinition(packageDef) as unknown) as ProtoGrpc
 // The NODE_EXTRA_CA_CERTS environment variable is only read when the Node.js process is first launched.
 // Changing the value at runtime has no effect on the current process.
 
-// process.env.NODE_EXTRA_CA_CERTS = __dirname + '/../tls/ca.pem'
+// process.env.NODE_EXTRA_CA_CERTS = process.cwd() + '/../tls/ca.pem'
 
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
