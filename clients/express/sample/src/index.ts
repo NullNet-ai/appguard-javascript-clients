@@ -1,5 +1,5 @@
 import express from 'express'
-import {AppGuardConfig, createAppGuardMiddleware, FirewallPolicy} from '@nullnet/app-guard-express'
+import {AppGuardConfig, createAppGuardMiddleware, FirewallPolicy} from '@nullnet/appguard-express'
 
 const app = express()
 
@@ -21,16 +21,19 @@ const appGuardMiddleware = createAppGuardMiddleware(appGuardConfig)
 
 // AC #2: 
 // Able to use as middleware to specific route
+// @ts-ignore
 app.get('/some-route', appGuardMiddleware, async (req, res) => {
     res.json({message: 'Hello World'})
 })
 
+// @ts-ignore
 app.get('/index' , appGuardMiddleware, async (req, res) => {
     res.json({message: 'Hello World'})
 })
 
 // AC #3:
 // Able to uses a default route controller
+// @ts-ignore
 app.get('*' , appGuardMiddleware, async (req, res) => {
     res.json({message: 'Hello World'})
 })

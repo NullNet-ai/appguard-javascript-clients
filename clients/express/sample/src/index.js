@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const app_guard_1 = __importDefault(require("./modules/app-guard"));
+const app_guard_1 = __importDefault(require("./modules/appguard"));
 const app = (0, express_1.default)();
 // AC #1:
 // Able to use as direct express module

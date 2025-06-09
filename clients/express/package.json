@@ -23,7 +23,6 @@
   "dependencies": {
     "appguard-client-common": "file:../../client_common",
     "body-parser": "^1.20.2",
-    "dotenv": "^16.5.0",
     "express": "^4.19.2",
     "nodemon": "^3.1.2"
   },
@@ -33,16 +32,16 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "@nullnet/app-guard-express",
+  "name": "@nullnet/appguard-express",
   "author": "Giuliano Bellini s294739",
-  "module": "dist/app-guard-express.esm.js",
+  "module": "dist/appguard-express.esm.js",
   "size-limit": [
     {
-      "path": "dist/app-guard-express.cjs.production.min.js",
+      "path": "dist/appguard-express.cjs.production.min.js",
       "limit": "10 KB"
     },
     {
-      "path": "dist/app-guard-express.esm.js",
+      "path": "dist/appguard-express.esm.js",
       "limit": "10 KB"
     }
   ],

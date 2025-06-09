@@ -10,7 +10,7 @@
   "author": "bon",
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "@nullnet/app-guard-express": "file:../",
+    "@nullnet/appguard-express": "file:../",
     "express": "^4.19.2"
   },
   "devDependencies": {

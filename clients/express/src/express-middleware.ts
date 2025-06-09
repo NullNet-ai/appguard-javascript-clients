@@ -142,7 +142,7 @@ export const createAppGuardMiddleware = (config: AppGuardConfig) => {
       console.error(error);
       // @ts-ignore
       res.status(500).send({
-        module: 'app-guard',
+        module: 'appguard',
         message: 'Internal server error',
       });
     }

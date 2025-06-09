@@ -14,8 +14,11 @@ import {TOKEN_FILE} from "./auth";
 import {AppGuardFirewall, AppGuardFirewall__Output} from "./proto/appguard/AppGuardFirewall";
 import {FirewallPolicy} from "./proto/appguard/FirewallPolicy";
 
-const PROTO_FILE = process.cwd() + '/../proto/appguard.proto'
-const packageDef = protoLoader.loadSync(PROTO_FILE)
+const opts = {includeDirs: [
+    'node_modules/@nullnet/appguard-express/node_modules/appguard-client-common/proto/',
+    'node_modules/@nullnet/appguard-nextjs/node_modules/appguard-client-common/proto/',
+    ]};
+const packageDef = protoLoader.loadSync('appguard.proto', opts);
 const grpcObj = (grpc.loadPackageDefinition(packageDef) as unknown) as ProtoGrpcType
 
 // it doesn't work with .cer files, convert them to .pem with the following command:
