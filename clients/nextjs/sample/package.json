@@ -1,0 +1,22 @@
+{
+  "name": "appguard-nextjs-sample",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@nullnet/appguard-nextjs": "file:../",
+    "dotenv": "^16.5.0",
+    "next": "^15.4.0-canary.67"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/react": "19.1.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
