@@ -10,7 +10,6 @@ type SubtypeConstructor<Constructor extends new (...args: any) => any, Subtype> 
 export interface ProtoGrpcType {
   appguard: {
     AppGuard: SubtypeConstructor<typeof grpc.Client, _appguard_AppGuardClient> & { service: _appguard_AppGuardDefinition }
-    AppGuardFirewall: MessageTypeDefinition
     AppGuardHttpRequest: MessageTypeDefinition
     AppGuardHttpResponse: MessageTypeDefinition
     AppGuardIpInfo: MessageTypeDefinition
@@ -20,13 +19,23 @@ export interface ProtoGrpcType {
     AppGuardTcpConnection: MessageTypeDefinition
     AppGuardTcpInfo: MessageTypeDefinition
     AppGuardTcpResponse: MessageTypeDefinition
-    DeviceStatus: EnumTypeDefinition
-    Empty: MessageTypeDefinition
-    FirewallPolicy: EnumTypeDefinition
-    HeartbeatRequest: MessageTypeDefinition
-    HeartbeatResponse: MessageTypeDefinition
     Log: MessageTypeDefinition
     Logs: MessageTypeDefinition
+    Token: MessageTypeDefinition
+  }
+  appguard_commands: {
+    Authentication: MessageTypeDefinition
+    AuthenticationData: MessageTypeDefinition
+    AuthorizationRequest: MessageTypeDefinition
+    ClientMessage: MessageTypeDefinition
+    FirewallDefaults: MessageTypeDefinition
+    FirewallPolicy: EnumTypeDefinition
+    ServerMessage: MessageTypeDefinition
+  }
+  google: {
+    protobuf: {
+      Empty: MessageTypeDefinition
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-// Original file: proto/appguard.proto
+// Original file: proto/commands.proto
 
 export enum FirewallPolicy {
   UNKNOWN = 0,

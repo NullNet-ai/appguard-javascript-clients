@@ -7,12 +7,12 @@ import {AppGuardResponse__Output} from './proto/appguard/AppGuardResponse'
 import {AppGuardTcpConnection} from './proto/appguard/AppGuardTcpConnection'
 import {AppGuardHttpResponse} from './proto/appguard/AppGuardHttpResponse'
 import {AppGuardTcpResponse__Output} from "./proto/appguard/AppGuardTcpResponse";
-import {HeartbeatRequest} from "./proto/appguard/HeartbeatRequest";
-import {HeartbeatResponse__Output} from "./proto/appguard/HeartbeatResponse";
-import {DeviceStatus} from "./proto/appguard/DeviceStatus";
 import {TOKEN_FILE} from "./auth";
 import {AppGuardFirewall, AppGuardFirewall__Output} from "./proto/appguard/AppGuardFirewall";
 import {FirewallPolicy} from "./proto/appguard/FirewallPolicy";
+import {AuthorizationRequest} from "./proto/appguard_commands/AuthorizationRequest";
+import {ClientMessage} from "./proto/appguard_commands/ClientMessage";
+import {ServerMessage__Output} from "./proto/appguard_commands/ServerMessage";
 
 const opts = {includeDirs: [
     'node_modules/@nullnet/appguard-express/node_modules/appguard-client-common/proto/',
@@ -131,9 +131,20 @@ export class AppGuardService {
         }
     }
 
-    heartbeat(req: HeartbeatRequest) {
-        let call = this.client.heartbeat(req);
-        call.on('data', function(heartbeat: HeartbeatResponse__Output) {
+    control_stream(req: AuthorizationRequest) {
+        let call = this.client.controlChannel();
+
+        let authz_req: ClientMessage = {authorizationRequest: req};
+        call.write(authz_req);
+
+        call.on('data', function(server_msg: ServerMessage__Output) {
+            if (server_msg.deviceAuthorized) {
+
+            } else if (server_msg.updateTokenCommand) {
+
+            } else if (server_msg.setFirewallDefaults) {
+
+            }
             // handle the heartbeat response
             console.log("Received heartbeat from server");
             // write token to file
@@ -149,9 +160,9 @@ export class AppGuardService {
         call.on('error', (_e) => {
             // An error has occurred and the stream has been closed.
             // sleep for 10 seconds and try again
-            console.log("Error in heartbeat, retrying in 10 seconds");
+            console.log("Error in control stream");
             setTimeout(() => {
-                this.heartbeat(req);
+                this.control_stream(req);
             }, 10000);
         });
     }

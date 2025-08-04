@@ -1,4 +1,4 @@
-// Original file: proto/appguard.proto
+// Original file: null
 
 
 export interface Empty {

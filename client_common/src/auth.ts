@@ -35,7 +35,7 @@ export class AuthHandler {
             appSecret: this.app_secret,
         };
 
-        this.client.heartbeat(hb_req);
+        this.client.control_stream(hb_req);
 
         console.log("Waiting for the first server heartbeat...");
         while (this.token() === '') {
