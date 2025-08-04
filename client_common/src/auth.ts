@@ -1,41 +1,39 @@
 import {AppGuardService} from "./appguard";
-import {HeartbeatRequest} from "./proto/appguard/HeartbeatRequest";
+import {AuthorizationRequest} from "./proto/appguard_commands/AuthorizationRequest";
+import {FirewallDefaults} from "./proto/appguard_commands/FirewallDefaults";
 
 export const TOKEN_FILE = process.cwd() + '/../token.txt'
+export const APP_ID_FILE = process.cwd() + '/../app_id.txt'
+export const APP_SECRET_FILE = process.cwd() + '/../app_secret.txt'
+export const FIREWALL_DEFAULTS_FILE = process.cwd() + '/../firewall_defaults.json'
+
+const fs = require('fs');
 
 export class AuthHandler {
-    private app_id: string
-    private app_secret: string
+    private installation_code: string
     private client: AppGuardService
 
     constructor(client: AppGuardService) {
         require('dotenv').config()
 
-        this.app_id = process.env.APP_ID || ''
-        this.app_secret = process.env.APP_SECRET || ''
+        this.installation_code = process.env.INSTALLATION_CODE || ''
         this.client = client
 
-        if (this.app_id === '') {
-            console.log('APP_ID environment variable is not set')
-            process.exit(1)
-        }
-        if (this.app_secret === '') {
-            console.log('APP_SECRET environment variable is not set')
-            process.exit(1)
-        }
-
         // empty token file content
-        const fs = require('fs');
         fs.writeFileSync(TOKEN_FILE, '', {flag: 'w'});
     }
 
-    async init(){
-        let hb_req: HeartbeatRequest = {
-            appId: this.app_id,
-            appSecret: this.app_secret,
+    async init(type: string){
+
+        let req: AuthorizationRequest = {
+            uuid: "",
+            code: this.installation_code,
+            category: "AppGuard Client",
+            targetOs: undefined,
+            type: type,
         };
 
-        this.client.control_stream(hb_req);
+        this.client.control_stream(req);
 
         console.log("Waiting for the first server heartbeat...");
         while (this.token() === '') {
@@ -46,7 +44,6 @@ export class AuthHandler {
     }
 
     token(): string {
-        const fs = require('fs');
         return fs.readFileSync(TOKEN_FILE, 'utf8');
     }
 }
