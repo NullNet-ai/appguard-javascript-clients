@@ -6,15 +6,24 @@ export const TOKEN_FILE = process.cwd() + '/../token.txt'
 export const APP_ID_FILE = process.cwd() + '/../app_id.txt'
 export const APP_SECRET_FILE = process.cwd() + '/../app_secret.txt'
 export const FIREWALL_DEFAULTS_FILE = process.cwd() + '/../firewall_defaults.json'
+export const UUID_FILE = process.cwd() + '/../uuid.txt'
 
 const fs = require('fs');
 
 export class AuthHandler {
+    private uuid: string
     private installation_code: string
     private client: AppGuardService
 
     constructor(client: AppGuardService) {
         require('dotenv').config()
+
+        let uuid: string = fs.readFileSync(UUID_FILE, 'utf8');
+        if (!uuid || uuid.trim() === '') {
+            uuid = crypto.randomUUID();
+            fs.writeFileSync(UUID_FILE, uuid, {flag: 'w'});
+        }
+        this.uuid = uuid.trim();
 
         this.installation_code = process.env.INSTALLATION_CODE || ''
         this.client = client
@@ -24,9 +33,8 @@ export class AuthHandler {
     }
 
     async init(type: string){
-
         let req: AuthorizationRequest = {
-            uuid: "",
+            uuid: this.uuid,
             code: this.installation_code,
             category: "AppGuard Client",
             targetOs: undefined,
@@ -36,7 +44,7 @@ export class AuthHandler {
         this.client.control_stream(req);
 
         console.log("Waiting for the first server heartbeat...");
-        while (this.token() === '') {
+        while (this.token().trim() === '') {
             // sleep for 1 second
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
