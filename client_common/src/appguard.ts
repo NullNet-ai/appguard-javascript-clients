@@ -11,7 +11,7 @@ import {APP_ID_FILE, APP_SECRET_FILE, FIREWALL_DEFAULTS_FILE, TOKEN_FILE} from "
 import {AuthorizationRequest} from "./proto/appguard_commands/AuthorizationRequest";
 import {ClientMessage} from "./proto/appguard_commands/ClientMessage";
 import {ServerMessage__Output} from "./proto/appguard_commands/ServerMessage";
-import {FirewallDefaults} from "./proto/appguard_commands/FirewallDefaults";
+import {FirewallDefaults, FirewallDefaults__Output} from "./proto/appguard_commands/FirewallDefaults";
 
 const opts = {includeDirs: [
     'node_modules/@nullnet/appguard-express/node_modules/appguard-client-common/proto/',
@@ -32,22 +32,21 @@ const fs = require('fs');
 
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-export type AppGuardConfig = {
-    host: string;
-    port: number;
-    tls: boolean;
-};
-
 export class AppGuardService {
     private client: AppGuardClient
-    private config: AppGuardConfig
 
-    constructor(config: AppGuardConfig){
+    constructor(){
+        require('dotenv').config()
+        let host = process.env.CONTROL_SERVICE_ADDR || '0.0.0.0'
+        let port = process.env.CONTROL_SERVICE_PORT || '50051'
+        let tls = false;
+
+        console.log(`Connecting to ${host}:${port}`);
+
         this.client = new grpcObj.appguard.AppGuard(
-            `${config.host}:${config.port}`,
-            config.tls ? grpc.credentials.createSsl() : grpc.credentials.createInsecure()
+            `${host}:${port}`,
+            tls ? grpc.credentials.createSsl() : grpc.credentials.createInsecure()
         );
-        this.config = config;
     }
     async onModuleInit(){
         return new Promise((resolve, reject) => {
@@ -100,8 +99,23 @@ export class AppGuardService {
         })
     }
 
+    async firewallDefaultsRequest(token: string): Promise<FirewallDefaults__Output>{
+        let req = {
+            token: token,
+        };
+        return new Promise((resolve, reject) => {
+            this.client.firewallDefaultsRequest(req, (err, res) => {
+                if(err){
+                    reject(err)
+                } else {
+                    resolve(res as FirewallDefaults__Output)
+                }
+            })
+        })
+    }
+
     firewallPromise = (promise: Promise<AppGuardResponse__Output>): Promise<AppGuardResponse__Output> => {
-        let firewallDefaults: FirewallDefaults = getFirewallDefaults();
+        let firewallDefaults: FirewallDefaults = readFirewallDefaults();
         let timeout = firewallDefaults.timeout;
         let defaultPolicy = firewallDefaults.policy;
         if (timeout !== undefined) {
@@ -117,7 +131,7 @@ export class AppGuardService {
     }
 
     connectionPromise = (connection: AppGuardTcpConnection): Promise<AppGuardTcpResponse__Output> => {
-        let firewallDefaults: FirewallDefaults = getFirewallDefaults();
+        let firewallDefaults: FirewallDefaults = readFirewallDefaults();
         let timeout = firewallDefaults.timeout;
         let promise = this.handleTcpConnection(connection);
         if (timeout !== undefined) {
@@ -194,7 +208,7 @@ export class AppGuardService {
     }
 }
 
-function getFirewallDefaults(): FirewallDefaults {
+function readFirewallDefaults(): FirewallDefaults {
     let text = fs.readFileSync(FIREWALL_DEFAULTS_FILE, 'utf8');
     return JSON.parse(text);
 }

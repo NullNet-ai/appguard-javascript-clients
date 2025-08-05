@@ -1,18 +1,9 @@
 import express from 'express'
-import {AppGuardConfig, createAppGuardMiddleware, FirewallPolicy} from '@nullnet/appguard-express'
+import {createAppGuardMiddleware, FirewallPolicy} from '@nullnet/appguard-express'
 
 const app = express()
 
-const appGuardConfig: AppGuardConfig = {
-    host: 'localhost',
-    port: 50051,
-    tls: false,
-    defaultPolicy: FirewallPolicy.ALLOW,
-    timeout: 1_000,
-    firewall: "[]",
-}
-
-const appGuardMiddleware = createAppGuardMiddleware(appGuardConfig)
+const appGuardMiddleware = createAppGuardMiddleware()
 
 // AC #1:
 // Able to use as direct express module

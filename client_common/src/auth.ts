@@ -46,4 +46,8 @@ export class AuthHandler {
     token(): string {
         return fs.readFileSync(TOKEN_FILE, 'utf8');
     }
+
+    writeFirewallDefaults(firewallDefaults: FirewallDefaults) {
+        fs.writeFileSync(FIREWALL_DEFAULTS_FILE, JSON.stringify(firewallDefaults), {flag: 'w'});
+    }
 }

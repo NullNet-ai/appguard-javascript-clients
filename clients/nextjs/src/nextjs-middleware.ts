@@ -1,19 +1,17 @@
 import {NextRequest, NextResponse} from 'next/server';
-import { FirewallPolicy, AppGuardTcpInfo, AppGuardService, AuthHandler, AppGuardConfig } from 'appguard-client-common';
+import { FirewallPolicy, AppGuardTcpInfo, AppGuardService, AuthHandler } from 'appguard-client-common';
 
 type NextjsMiddleware = (req: NextRequest) => Promise<NextResponse>;
 
-export const createAppGuardMiddleware = async (config: AppGuardConfig) => {
-    const appGuardService = new AppGuardService(config);
+export const createAppGuardMiddleware = async () => {
+    const appGuardService = new AppGuardService();
     let authHandler = new AuthHandler(appGuardService);
 
     async function initialize() {
         await appGuardService.onModuleInit();
-        await authHandler.init();
-        await appGuardService.updateFirewall({
-            token: authHandler.token(),
-            firewall: config.firewall
-        })
+        await authHandler.init("NextJS");
+        let fw_defaults = await appGuardService.firewallDefaultsRequest(authHandler.token());
+        authHandler.writeFirewallDefaults(fw_defaults);
     }
     await initialize();
 
