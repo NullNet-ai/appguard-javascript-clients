@@ -1,5 +1,5 @@
 import express from 'express'
-import {createAppGuardMiddleware, FirewallPolicy} from '@nullnet/appguard-express'
+import {createAppGuardMiddleware} from '@nullnet/appguard-express'
 
 const app = express()
 
