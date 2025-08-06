@@ -1,16 +1,7 @@
 import type {NextRequest} from 'next/server'
-import {AppGuardConfig, createAppGuardMiddleware, FirewallPolicy} from "../../src";
+import {createAppGuardMiddleware} from "../../src";
 
-const appGuardConfig: AppGuardConfig = {
-    host: 'localhost',
-    port: 50051,
-    tls: false,
-    defaultPolicy: FirewallPolicy.ALLOW,
-    timeout: 1_000,
-    firewall: '[{"policy": "deny", "infix_tokens": [{"type": "predicate", "condition": "contains", "http_request_url": [".php", ".env"]}]}]',
-}
-
-let appGuardMiddleware = await createAppGuardMiddleware(appGuardConfig);
+let appGuardMiddleware = await createAppGuardMiddleware();
 
 export default async function middleware(request: NextRequest) {
     return await appGuardMiddleware(request);

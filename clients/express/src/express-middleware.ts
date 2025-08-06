@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Send } from 'express';
-import { FirewallPolicy, AppGuardTcpInfo, AppGuardService, AuthHandler, AppGuardConfig } from 'appguard-client-common';
+import { FirewallPolicy, AppGuardTcpInfo, AppGuardService, AuthHandler } from 'appguard-client-common';
 
 type ExpressMiddleware = (
   req: Request,
@@ -7,19 +7,15 @@ type ExpressMiddleware = (
   next: NextFunction
 ) => void | Promise<void>;
 
-export const createAppGuardMiddleware = (config: AppGuardConfig) => {
-  const appGuardService = new AppGuardService(config);
+export const createAppGuardMiddleware = () => {
+  const appGuardService = new AppGuardService();
   let authHandler = new AuthHandler(appGuardService);
 
   async function initialize() {
     await appGuardService.onModuleInit();
-    await authHandler.init();
-    await appGuardService.updateFirewall({
-        // @ts-ignore
-        token: authHandler.token(),
-        // @ts-ignore
-        firewall: config.firewall
-    })
+    await authHandler.init("ExpressJS");
+    let fw_defaults = await appGuardService.firewallDefaultsRequest(authHandler.token());
+    authHandler.writeFirewallDefaults(fw_defaults);
   }
   initialize();
 

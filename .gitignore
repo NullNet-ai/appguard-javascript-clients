@@ -4,6 +4,10 @@ node_modules
 dist
 .idea
 token.txt
+app_id.txt
+app_secret.txt
+firewall_defaults.json
+uuid.txt
 .env
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
