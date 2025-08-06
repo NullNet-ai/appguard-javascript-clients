@@ -1,6 +1,7 @@
 import {AppGuardService} from "./appguard";
 import {AuthorizationRequest} from "./proto/appguard_commands/AuthorizationRequest";
 import {FirewallDefaults} from "./proto/appguard_commands/FirewallDefaults";
+import { v4 as uuidv4 } from 'uuid';
 
 export const TOKEN_FILE = process.cwd() + '/../token.txt'
 export const APP_ID_FILE = process.cwd() + '/../app_id.txt'
@@ -18,12 +19,13 @@ export class AuthHandler {
     constructor(client: AppGuardService) {
         require('dotenv').config()
 
-        let uuid: string = fs.readFileSync(UUID_FILE, 'utf8');
-        if (!uuid || uuid.trim() === '') {
-            uuid = crypto.randomUUID();
-            fs.writeFileSync(UUID_FILE, uuid, {flag: 'w'});
+        let uuid_exists: boolean = fs.existsSync(UUID_FILE);
+        if (uuid_exists) {
+            this.uuid = fs.readFileSync(UUID_FILE, 'utf8');
+        } else {
+            this.uuid = uuidv4();
+            fs.writeFileSync(UUID_FILE, this.uuid, {flag: 'w'})
         }
-        this.uuid = uuid.trim();
 
         this.installation_code = process.env.INSTALLATION_CODE || ''
         this.client = client
