@@ -8,6 +8,7 @@ export const APP_ID_FILE = process.cwd() + '/../app_id.txt'
 export const APP_SECRET_FILE = process.cwd() + '/../app_secret.txt'
 export const FIREWALL_DEFAULTS_FILE = process.cwd() + '/../firewall_defaults.json'
 export const UUID_FILE = process.cwd() + '/../uuid.txt'
+export const CACHE_FILE = process.cwd() + '/../cache.txt'
 
 const fs = require('fs');
 

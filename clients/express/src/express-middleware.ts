@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Send } from 'express';
-import { FirewallPolicy, AppGuardTcpInfo, AppGuardService, AuthHandler } from 'appguard-client-common';
+import { FirewallPolicy, AppGuardTcpInfo, AppGuardService, AuthHandler, CacheKey } from 'appguard-client-common';
 
 type ExpressMiddleware = (
   req: Request,
@@ -21,7 +21,8 @@ export const createAppGuardMiddleware = () => {
 
   const attachResponseHandlers = (
     res: Response,
-    tcp_info: AppGuardTcpInfo
+    tcp_info: AppGuardTcpInfo,
+    cacheKey: CacheKey,
   ) => {
     // Storing the original send function
     // @ts-ignore
@@ -49,10 +50,12 @@ export const createAppGuardMiddleware = () => {
       ));
 
       if (handleHTTPResponseResponse.policy === FirewallPolicy.DENY) {
+        appGuardService.insertToCache(cacheKey, FirewallPolicy.DENY);
         // Destroying the socket connection instead of sending the response
         // @ts-ignore
         res.socket?.destroy();
       } else {
+        appGuardService.insertToCache(cacheKey, FirewallPolicy.ALLOW);
         // Intercepting the response.send() call
         // Calling the original send function
         //@ts-expect-error: This function is this context
@@ -72,6 +75,7 @@ export const createAppGuardMiddleware = () => {
         // @ts-ignore
         req.socket.remoteAddress;
 
+
       // console.log(
       //   // @ts-ignore
       //   `Appguard Debug XRI:${req.headers['x-real-ip']} - XFF:${req.headers['x-forwarded-for']} TCP/PROXY:${req.socket.remoteAddress} SRC=${sourceIp}`
@@ -81,6 +85,32 @@ export const createAppGuardMiddleware = () => {
       //   // @ts-ignore
       //   `Appguard Debug From - ${sourceIp} - ${req.method} ${req.originalUrl}`
       // );
+
+        let cacheKey: CacheKey = {
+            // @ts-ignore
+            originalUrl: req.originalUrl,
+            // @ts-ignore
+            method: req.method,
+            // @ts-ignore
+            body: req.body,
+            // @ts-ignore
+            sourceIp: sourceIp,
+            // @ts-ignore
+            headers: req.headers as Record<string, string>,
+            // @ts-ignore
+            query: req.query as Record<string, string>,
+        };
+
+        let cached = appGuardService.getFromCache(cacheKey);
+        if (cached !== undefined) {
+            if (cached === FirewallPolicy.DENY) {
+                // @ts-ignore
+                res.socket?.destroy();
+            } else {
+                next();
+            }
+            return;
+        }
 
       const handleTCPConnectionResponse = await appGuardService.connectionPromise(
           {
@@ -122,6 +152,7 @@ export const createAppGuardMiddleware = () => {
 
       const policy = handleHTTPRequestResponse.policy;
       if (policy === FirewallPolicy.DENY) {
+        appGuardService.insertToCache(cacheKey, FirewallPolicy.DENY);
         // Destroying the socket connection instead of sending the response
         // @ts-ignore
         res.socket?.destroy();
@@ -130,7 +161,8 @@ export const createAppGuardMiddleware = () => {
         // attach response handlers after we get the req.id
         attachResponseHandlers(
           res,
-          handleTCPConnectionResponse.tcpInfo as AppGuardTcpInfo
+          handleTCPConnectionResponse.tcpInfo as AppGuardTcpInfo,
+          cacheKey
         );
         next();
       }
