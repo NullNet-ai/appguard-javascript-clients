@@ -96,7 +96,7 @@ export const createAppGuardMiddleware = () => {
             // @ts-ignore
             sourceIp: sourceIp,
             // @ts-ignore
-            headers: req.headers as Record<string, string>,
+            userAgent: req.headers["user-agent"],
             // @ts-ignore
             query: req.query as Record<string, string>,
         };

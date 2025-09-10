@@ -5,7 +5,7 @@ export class CacheKey {
     method: string;
     body: string;
     sourceIp: string;
-    headers: Record<string, string>;
+    userAgent: string;
     query: Record<string, string>;
 }
 

@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from 'next/server';
-import { FirewallPolicy, AppGuardTcpInfo, AppGuardService, AuthHandler } from 'appguard-client-common';
+import { FirewallPolicy, AppGuardTcpInfo, AppGuardService, AuthHandler, CacheKey } from 'appguard-client-common';
 
 type NextjsMiddleware = (req: NextRequest) => Promise<NextResponse>;
 
@@ -15,7 +15,7 @@ export const createAppGuardMiddleware = async () => {
     }
     await initialize();
 
-    const handleOutgoingResponse = async (tcp_info: AppGuardTcpInfo): Promise<NextResponse> => {
+    const handleOutgoingResponse = async (tcp_info: AppGuardTcpInfo, cacheKey: CacheKey): Promise<NextResponse> => {
         let res = NextResponse.next();
         const response_headers = res.headers;
 
@@ -30,11 +30,13 @@ export const createAppGuardMiddleware = async () => {
         ));
 
         if (handleHTTPResponseResponse.policy === FirewallPolicy.DENY) {
+            appGuardService.insertToCache(cacheKey, FirewallPolicy.DENY);
             return NextResponse.json(
                 {success: false, message: 'Unauthorized'},
                 {status: 401}
             );
         } else {
+            appGuardService.insertToCache(cacheKey, FirewallPolicy.ALLOW);
             return NextResponse.next();
         }
     };
@@ -48,6 +50,31 @@ export const createAppGuardMiddleware = async () => {
             const sourcePort = req.headers.get('x-forwarded-port') ?
                 parseInt(req.headers.get('x-forwarded-port') as string, 10) :
                 undefined;
+
+            let cacheKey: CacheKey = {
+                originalUrl: req.nextUrl.pathname,
+                method: req.method,
+                // @ts-ignore
+                body: req.body,
+                // @ts-ignore
+                sourceIp: sourceIp,
+                // @ts-ignore
+                userAgent: req.headers["user-agent"],
+                // @ts-ignore
+                query: req.nextUrl.searchParams as Record<string, string>,
+            };
+
+            let cached = appGuardService.getFromCache(cacheKey);
+            if (cached !== undefined) {
+                if (cached === FirewallPolicy.DENY) {
+                    return NextResponse.json(
+                        {success: false, message: 'Unauthorized'},
+                        {status: 401}
+                    );
+                } else {
+                    return NextResponse.next();
+                }
+            }
 
             const handleTCPConnectionResponse = await appGuardService.connectionPromise(
                 {
@@ -80,12 +107,13 @@ export const createAppGuardMiddleware = async () => {
 
             const policy = handleHTTPRequestResponse.policy;
             if (policy === FirewallPolicy.DENY) {
+                appGuardService.insertToCache(cacheKey, FirewallPolicy.DENY);
                 return NextResponse.json(
                     {success: false, message: 'Unauthorized'},
                     {status: 401}
                 );
             } else {
-                return await handleOutgoingResponse(handleTCPConnectionResponse.tcpInfo as AppGuardTcpInfo);
+                return await handleOutgoingResponse(handleTCPConnectionResponse.tcpInfo as AppGuardTcpInfo, cacheKey);
             }
         } catch (error) {
             console.error(error);
