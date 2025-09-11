@@ -12,7 +12,7 @@ import {AuthorizationRequest} from "./proto/appguard_commands/AuthorizationReque
 import {ClientMessage} from "./proto/appguard_commands/ClientMessage";
 import {ServerMessage__Output} from "./proto/appguard_commands/ServerMessage";
 import {FirewallDefaults, FirewallDefaults__Output} from "./proto/appguard_commands/FirewallDefaults";
-import {Cache, CacheKey} from "./cache";
+import {CacheKey} from "./cache";
 import {FirewallPolicy} from "./proto/appguard_commands/FirewallPolicy";
 
 const opts = {includeDirs: [
@@ -189,8 +189,8 @@ export class AppGuardService {
                 console.log("Received firewall defaults from server:", firewallDefaults);
                 fs.writeFileSync(FIREWALL_DEFAULTS_FILE, JSON.stringify(firewallDefaults), {flag: 'w'});
                 // empty and update cache
-                let cache = new Cache(firewallDefaults.cache);
-                fs.writeFileSync(CACHE_FILE, JSON.stringify(cache), {flag: 'w'});
+                let cache: Map<string, FirewallPolicy> = new Map([]);
+                writeCache(cache);
             }
             if (server_msg.deviceDeauthorized) {
                 // delete saved app secret and app id
@@ -213,28 +213,47 @@ export class AppGuardService {
     }
 
     getFromCache(key: CacheKey) : FirewallPolicy | undefined {
-        let cache = readCache();
-        return cache.get(key);
+        let defaults = readFirewallDefaults();
+        if (defaults.cache) {
+            let cache = readCache();
+            return cache.get(JSON.stringify(key));
+        }
     }
 
     insertToCache(key: CacheKey, policy: FirewallPolicy) {
-        let cache = readCache();
-        cache.insert(key, policy);
-        fs.writeFileSync(CACHE_FILE, JSON.stringify(cache), {flag: 'w'});
+        let defaults = readFirewallDefaults();
+        if (defaults.cache) {
+            let cache = readCache();
+            cache.set(JSON.stringify(key), policy);
+            writeCache(cache);
+        }
     }
 }
 
 function readFirewallDefaults(): FirewallDefaults {
     let text = fs.readFileSync(FIREWALL_DEFAULTS_FILE, 'utf8');
-    return JSON.parse(text);
-}
-
-function readCache(): Cache {
-    let text = fs.readFileSync(CACHE_FILE, 'utf8');
     if (text.trim() === '') {
-        let firewallDefaults = readFirewallDefaults();
-        return new Cache(firewallDefaults.cache);
+        return {
+            policy: FirewallPolicy.ALLOW,
+            timeout: 1000,
+            cache: true,
+        };
     } else {
         return JSON.parse(text);
     }
+}
+
+function readCache(): Map<string, FirewallPolicy> {
+    let text = fs.readFileSync(CACHE_FILE, 'utf8');
+    if (text.trim() === '') {
+        return new Map([]);
+    } else {
+        let map: Map<string, FirewallPolicy> = new Map(JSON.parse(text))
+        return map;
+    }
+}
+
+function writeCache(cache: Map<string, FirewallPolicy>) {
+    let mySerialMap = JSON.stringify(Array.from(cache.entries()));
+    fs.writeFileSync(CACHE_FILE, mySerialMap, {flag: 'w'});
 }
