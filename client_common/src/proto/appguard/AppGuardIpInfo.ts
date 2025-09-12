@@ -11,7 +11,6 @@ export interface AppGuardIpInfo {
   'region'?: (string);
   'postal'?: (string);
   'timezone'?: (string);
-  'blacklist'?: (boolean);
   '_country'?: "country";
   '_asn'?: "asn";
   '_org'?: "org";
@@ -32,5 +31,4 @@ export interface AppGuardIpInfo__Output {
   'region'?: (string);
   'postal'?: (string);
   'timezone'?: (string);
-  'blacklist'?: (boolean);
 }

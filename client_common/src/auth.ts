@@ -3,11 +3,12 @@ import {AuthorizationRequest} from "./proto/appguard_commands/AuthorizationReque
 import {FirewallDefaults} from "./proto/appguard_commands/FirewallDefaults";
 import { v4 as uuidv4 } from 'uuid';
 
-export const TOKEN_FILE = process.cwd() + '/../token.txt'
-export const APP_ID_FILE = process.cwd() + '/../app_id.txt'
-export const APP_SECRET_FILE = process.cwd() + '/../app_secret.txt'
-export const FIREWALL_DEFAULTS_FILE = process.cwd() + '/../firewall_defaults.json'
-export const UUID_FILE = process.cwd() + '/../uuid.txt'
+export const TOKEN_FILE = process.cwd() + '/token.txt'
+export const APP_ID_FILE = process.cwd() + '/app_id.txt'
+export const APP_SECRET_FILE = process.cwd() + '/app_secret.txt'
+export const FIREWALL_DEFAULTS_FILE = process.cwd() + '/firewall_defaults.json'
+export const UUID_FILE = process.cwd() + '/uuid.txt'
+export const CACHE_FILE = process.cwd() + '/cache.txt'
 
 const fs = require('fs');
 
@@ -32,6 +33,10 @@ export class AuthHandler {
 
         // empty token file content
         fs.writeFileSync(TOKEN_FILE, '', {flag: 'w'});
+        // empty cache file content
+        fs.writeFileSync(CACHE_FILE, '', {flag: 'w'});
+        // empty firewall defaults file content
+        fs.writeFileSync(FIREWALL_DEFAULTS_FILE, '', {flag: 'w'});
     }
 
     async init(type: string){
