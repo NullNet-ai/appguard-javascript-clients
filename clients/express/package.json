@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "appguard-client-common": "file:../../client_common",
-    "body-parser": "^1.20.2",
-    "express": "^4.19.2",
+    "body-parser": "^1.20.4",
+    "express": "^4.22.1",
     "nodemon": "^3.1.2"
   },
   "prettier": {

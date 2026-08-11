@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "appguard-client-common": "file:../../client_common",
-    "next": "^15.4.0-canary.67"
+    "next": "^15.5.10"
   },
   "devDependencies": {
     "typescript": "^5"
